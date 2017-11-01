@@ -66,7 +66,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 ###################################### CELERY  ################################
 
 # Don't use a connection pool, since connections are dropped by ELB.
-BROKER_POOL_LIMIT = 0
+BROKER_POOL_LIMIT = 10
 BROKER_CONNECTION_TIMEOUT = 1
 
 # For the Result Store, use the django cache named 'celery'
