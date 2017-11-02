@@ -206,4 +206,4 @@ web-fragments==0.2.2
 xblock==1.0.0
 
 # Testing redis to replace rabbit for celery
-rabbit==2.10.6
+redis==2.10.6
