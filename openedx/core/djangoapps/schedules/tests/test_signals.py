@@ -20,6 +20,7 @@ from ..models import Schedule
 from ..tests.factories import ScheduleConfigFactory
 
 
+@ddt.ddt
 @patch('openedx.core.djangoapps.schedules.signals.get_current_site')
 @skip_unless_lms
 class CreateScheduleTests(SharedModuleStoreTestCase):
@@ -93,6 +94,32 @@ class CreateScheduleTests(SharedModuleStoreTestCase):
         mock_course_has_highlights.return_value = True
         mock_get_current_site.return_value = site
         self.assert_schedule_created(experience_type=ScheduleExperience.EXPERIENCES.course_updates)
+
+    @override_waffle_flag(CREATE_SCHEDULE_WAFFLE_FLAG, True)
+    @patch('analytics.track')
+    @patch('random.random')
+    @ddt.data(
+        (0, True),
+        (0.1, True),
+        (0.3, False),
+    )
+    @ddt.unpack
+    def test_create_schedule_hold_backs(
+        self,
+        hold_back_ratio,
+        create_schedule,
+        mock_random,
+        mock_track,
+        mock_get_current_site
+    ):
+        mock_random.return_value = 0.2
+        schedule_config = ScheduleConfigFactory.create(enabled=True, hold_back_ratio=hold_back_ratio)
+        mock_get_current_site.return_value = schedule_config.site
+        if create_schedule:
+            self.assert_schedule_created()
+        else:
+            self.assert_schedule_not_created()
+            mock_track.assert_called_once()
 
 
 @ddt.ddt

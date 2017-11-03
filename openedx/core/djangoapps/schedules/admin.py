@@ -40,4 +40,5 @@ class ScheduleConfigAdmin(admin.ModelAdmin):
         'enqueue_recurring_nudge', 'deliver_recurring_nudge',
         'enqueue_upgrade_reminder', 'deliver_upgrade_reminder',
         'enqueue_course_update', 'deliver_course_update',
+        'hold_back_ratio',
     )

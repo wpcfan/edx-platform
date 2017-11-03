@@ -1,5 +1,7 @@
 import datetime
+import json
 import logging
+import random
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -12,11 +14,13 @@ from courseware.models import (
     OrgDynamicUpgradeDeadlineConfiguration
 )
 from edx_ace.utils import date
+from experiments.models import ExperimentData
 from openedx.core.djangoapps.schedules.models import ScheduleExperience
 from openedx.core.djangoapps.schedules.content_highlights import course_has_highlights
 from openedx.core.djangoapps.signals.signals import COURSE_START_DATE_CHANGED
 from openedx.core.djangoapps.theming.helpers import get_current_site
 from student.models import CourseEnrollment
+import analytics
 from .config import CREATE_SCHEDULE_WAFFLE_FLAG
 from .models import Schedule, ScheduleConfig
 from .tasks import update_course_schedules
@@ -55,16 +59,33 @@ def create_schedule(sender, **kwargs):
 
     upgrade_deadline = _calculate_upgrade_deadline(enrollment.course_id, content_availability_date)
 
+    if course_has_highlights(enrollment.course_id):
+        experience_type = ScheduleExperience.EXPERIENCES.course_updates
+    else:
+        experience_type = ScheduleExperience.EXPERIENCES.default
+
+    if _suppress_schedules_for_some_enrollments(schedule_config):
+        log.debug('Schedules: Enrollment held back from dynamic schedule experiences.')
+        upgrade_deadline_str = None
+        if upgrade_deadline:
+            upgrade_deadline_str = upgrade_deadline.isoformat()
+        analytics.track(
+            'edx.bi.schedule.suppressed',
+            {
+                'user_id': enrollment.user.id,
+                'course_id': unicode(enrollment.course_id),
+                'experience_type': experience_type,
+                'upgrade_deadline': upgrade_deadline_str,
+                'content_availability_date': content_availability_date.isoformat(),
+            }
+        )
+        return
+
     schedule = Schedule.objects.create(
         enrollment=enrollment,
         start=content_availability_date,
         upgrade_deadline=upgrade_deadline
     )
-
-    if course_has_highlights(enrollment.course_id):
-        experience_type = ScheduleExperience.EXPERIENCES.course_updates
-    else:
-        experience_type = ScheduleExperience.EXPERIENCES.default
 
     ScheduleExperience(schedule=schedule, experience_type=experience_type).save()
 
@@ -91,6 +112,16 @@ def update_schedules_on_course_start_changed(sender, updated_course_overview, pr
                 new_upgrade_deadline_str=date.serialize(upgrade_deadline),
             ),
         )
+
+
+def _suppress_schedules_for_some_enrollments(schedule_config):
+    if schedule_config.hold_back_ratio <= 0 or schedule_config.hold_back_ratio > 1:
+        return False
+
+    if random.random() > schedule_config.hold_back_ratio:
+        return False
+
+    return True
 
 
 def _calculate_upgrade_deadline(course_id, content_availability_date):
