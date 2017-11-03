@@ -14,10 +14,10 @@ from django.test.utils import override_settings
 from edx_rest_api_client import exceptions
 from nose.plugins.attrib import attr
 
-from commerce.api.v0.views import SAILTHRU_CAMPAIGN_COOKIE
-from commerce.constants import Messages
-from commerce.tests.mocks import mock_basket_order
-from commerce.tests.test_views import UserMixin
+from lms.djangoapps.commerce.api.v0.views import SAILTHRU_CAMPAIGN_COOKIE
+from lms.djangoapps.commerce.constants import Messages
+from lms.djangoapps.commerce.tests.mocks import mock_basket_order
+from lms.djangoapps.commerce.tests.test_views import UserMixin
 from course_modes.models import CourseMode
 from enrollment.api import get_enrollment
 from openedx.core.djangoapps.embargo.test_utils import restrict_course
@@ -250,7 +250,7 @@ class BasketsViewTests(EnrollmentEventTestMixin, UserMixin, ModuleStoreTestCase)
         self.assertFalse(CourseEnrollment.is_enrolled(self.user, self.course.id))
         self.assertIsNotNone(get_enrollment(self.user.username, unicode(self.course.id)))
 
-    @mock.patch('commerce.api.v0.views.update_email_opt_in')
+    @mock.patch('lms.djangoapps.commerce.api.v0.views.update_email_opt_in')
     @ddt.data(*itertools.product((False, True), (False, True), (False, True)))
     @ddt.unpack
     def test_marketing_email_opt_in(self, is_opt_in, has_sku, is_exception, mock_update):

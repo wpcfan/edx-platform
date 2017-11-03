@@ -4,7 +4,7 @@ import json
 import httpretty
 from django.conf import settings
 
-from commerce.tests import factories
+from lms.djangoapps.commerce.tests import factories
 
 
 # pylint: disable=invalid-name

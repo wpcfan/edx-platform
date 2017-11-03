@@ -2,7 +2,7 @@
 from django.conf import settings
 from django.conf.urls import include, url
 
-from commerce.api.v1 import views
+from lms.djangoapps.commerce.api.v1 import views
 
 COURSE_URLS = [
     url(r'^$', views.CourseListView.as_view(), name='list'),

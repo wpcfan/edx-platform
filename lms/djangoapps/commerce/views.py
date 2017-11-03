@@ -10,7 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from opaque_keys.edx.locator import CourseLocator
 
-from commerce.models import CommerceConfiguration
+from lms.djangoapps.commerce.models import CommerceConfiguration
 from course_modes.models import CourseMode
 from edxmako.shortcuts import render_to_response
 from lms.djangoapps.verify_student.models import SoftwareSecurePhotoVerification

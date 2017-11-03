@@ -1,7 +1,7 @@
 """ Commerce API v1 serializer tests. """
 from django.test import TestCase
 
-from commerce.api.v1.serializers import serializers, validate_course_id
+from lms.djangoapps.commerce.api.v1.serializers import serializers, validate_course_id
 
 
 class CourseValidatorTests(TestCase):

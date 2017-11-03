@@ -9,8 +9,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.status import HTTP_406_NOT_ACCEPTABLE, HTTP_409_CONFLICT
 from rest_framework.views import APIView
 
-from commerce.constants import Messages
-from commerce.http import DetailResponse
+from lms.djangoapps.commerce.constants import Messages
+from lms.djangoapps.commerce.http import DetailResponse
 from course_modes.models import CourseMode
 from courseware import courses
 from enrollment.api import add_enrollment

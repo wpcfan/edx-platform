@@ -826,7 +826,7 @@ if configuration_helpers.get_value('ENABLE_BULK_ENROLLMENT_VIEW',
 # Shopping cart
 urlpatterns += (
     url(r'^shoppingcart/', include('shoppingcart.urls')),
-    url(r'^commerce/', include('commerce.urls', namespace='commerce')),
+    url(r'^commerce/', include('lms.djangoapps.commerce.urls', namespace='commerce')),
 )
 
 # Course goals
