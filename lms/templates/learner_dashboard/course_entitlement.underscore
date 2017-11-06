@@ -1,0 +1,9 @@
+<div class="message is-shown">
+    <h5> You must select a course run.</h5>
+    <select>
+        <option>June to July</option>
+        <option>July to August</option>
+        <option>August to September</option>
+    </select>
+    <button class="btn btn-primary"> Select Run </button>
+</div>

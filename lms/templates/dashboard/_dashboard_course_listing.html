@@ -1,4 +1,4 @@
-<%page args="course_overview, enrollment, show_courseware_link, cert_status, can_unenroll, credit_status, show_email_settings, course_mode_info, is_paid_course, is_course_blocked, verification_status, course_requirements, dashboard_index, share_settings, related_programs, display_course_modes_on_dashboard, show_consent_link, enterprise_customer_name" expression_filter="h"/>
+<%page args="course_overview, enrollment, entitlement, show_courseware_link, cert_status, can_unenroll, credit_status, show_email_settings, course_mode_info, is_paid_course, is_course_blocked, verification_status, course_requirements, dashboard_index, share_settings, related_programs, display_course_modes_on_dashboard, show_consent_link, enterprise_customer_name" expression_filter="h"/>
 
 <%!
 import urllib
@@ -33,6 +33,8 @@ from util.course import get_link_for_about_page, get_encoded_course_sharing_utm_
   if cert_name_long == "":
     cert_name_long = settings.CERT_NAME_LONG
   billing_email = settings.PAYMENT_SUPPORT_EMAIL
+
+  print self
 %>
 
 <%namespace name='static' file='../static_content.html'/>
@@ -267,6 +269,16 @@ from util.course import get_link_for_about_page, get_encoded_course_sharing_utm_
   </section>
   <footer class="wrapper-messages-primary">
     <div class="messages-list">
+
+        % if entitlement:
+            <div class="course-entitlement-selection-container"></div>
+          <%static:require_module module_name="js/learner_dashboard/entitlement_factory" class_name="EntitlementFactory">
+            EntitlementFactory({
+                $el: '.course-entitlement-selection-container'
+            });
+          </%static:require_module>
+        %endif
+
       % if related_programs:
       <div class="message message-related-programs is-shown">
         <span class="related-programs-preface" tabindex="0">${_('Related Programs')}:</span>
