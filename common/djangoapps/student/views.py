@@ -65,6 +65,7 @@ from courseware.access import has_access
 from courseware.courses import get_courses, sort_by_announcement, sort_by_start_date  # pylint: disable=import-error
 from django_comment_common.models import assign_role
 from edxmako.shortcuts import render_to_response, render_to_string
+from entitlements.models import CourseEntitlement
 from eventtracking import tracker
 from lms.djangoapps.commerce.utils import EcommerceService  # pylint: disable=import-error
 from lms.djangoapps.grades.course_grade_factory import CourseGradeFactory
@@ -681,6 +682,9 @@ def dashboard(request):
     site_org_whitelist, site_org_blacklist = get_org_black_and_whitelist_for_site(user)
     course_enrollments = list(get_course_enrollments(user, site_org_whitelist, site_org_blacklist))
 
+    # grab the entitlements for the user and filter them out of the enrollment list
+    course_entitlements = list(CourseEntitlement.objects.filter(user=user))
+
     # Record how many courses there are so that we can get a better
     # understanding of usage patterns on prod.
     monitoring_utils.accumulate('num_courses', len(course_enrollments))
@@ -867,6 +871,7 @@ def dashboard(request):
         'redirect_message': redirect_message,
         'account_activation_messages': account_activation_messages,
         'course_enrollments': course_enrollments,
+        'course_entitlements': course_entitlements,
         'course_optouts': course_optouts,
         'banner_account_activation_message': banner_account_activation_message,
         'sidebar_account_activation_message': sidebar_account_activation_message,

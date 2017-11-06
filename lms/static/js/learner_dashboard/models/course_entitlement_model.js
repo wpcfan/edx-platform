@@ -10,7 +10,8 @@
         function(Backbone) {
             return Backbone.Model.extend({
                 defaults: {
-                    is_fulfilled: false,
+                    course_session_id: null,
+                    available_sessions: [],
                 }
             });
         }

@@ -271,10 +271,11 @@ from util.course import get_link_for_about_page, get_encoded_course_sharing_utm_
     <div class="messages-list">
 
         % if entitlement:
-            <div class="course-entitlement-selection-container"></div>
-          <%static:require_module module_name="js/learner_dashboard/entitlement_factory" class_name="EntitlementFactory">
+          <div class="course-entitlement-selection-container"></div>
+          <%static:require_module module_name="js/learner_dashboard/course_entitlement_factory" class_name="EntitlementFactory">
             EntitlementFactory({
-                $el: '.course-entitlement-selection-container'
+                $el: '.course-entitlement-selection-container',
+                $data: ${ entitlement | n, dump_js_escaped_json },
             });
           </%static:require_module>
         %endif
