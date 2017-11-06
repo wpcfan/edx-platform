@@ -6,7 +6,6 @@ from django.views.decorators.http import require_GET
 
 from edxmako.shortcuts import render_to_response
 from lms.djangoapps.commerce.utils import EcommerceService
-
 from lms.djangoapps.learner_dashboard.utils import FAKE_COURSE_KEY, strip_course_id
 from openedx.core.djangoapps.programs.models import ProgramsApiConfig
 from openedx.core.djangoapps.programs.utils import (

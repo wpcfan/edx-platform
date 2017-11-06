@@ -18,11 +18,15 @@ from django.test.utils import override_settings
 from opaque_keys.edx.keys import CourseKey
 from requests import Timeout
 
+from course_modes.models import CourseMode
 from lms.djangoapps.commerce.models import CommerceConfiguration
-from lms.djangoapps.commerce.signals import create_zendesk_ticket, generate_refund_notification_body, send_refund_notification
+from lms.djangoapps.commerce.signals import (
+    create_zendesk_ticket,
+    generate_refund_notification_body,
+    send_refund_notification
+)
 from lms.djangoapps.commerce.tests import JSON
 from lms.djangoapps.commerce.tests.mocks import mock_create_refund, mock_process_refund
-from course_modes.models import CourseMode
 from student.signals import REFUND_ORDER
 from student.tests.factories import CourseEnrollmentFactory, UserFactory
 
