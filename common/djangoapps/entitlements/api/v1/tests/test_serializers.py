@@ -1,7 +1,7 @@
 from django.test import RequestFactory
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 
-from entitlements.serializers import CourseEntitlementSerializer
+from entitlements.api.v1.serializers import CourseEntitlementSerializer
 from entitlements.tests.factories import CourseEntitlementFactory
 
 

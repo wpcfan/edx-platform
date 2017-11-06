@@ -8,7 +8,7 @@ from rest_framework.authentication import SessionAuthentication
 
 from entitlements.api.v1.filters import CourseEntitlementFilter
 from entitlements.models import CourseEntitlement
-from entitlements.serializers import CourseEntitlementSerializer
+from entitlements.api.v1.serializers import CourseEntitlementSerializer
 from student.models import CourseEnrollment
 
 log = logging.getLogger(__name__)

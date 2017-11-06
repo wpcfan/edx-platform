@@ -9,15 +9,13 @@ from xmodule.modulestore.tests.factories import CourseFactory
 
 from entitlements.tests.factories import CourseEntitlementFactory
 from entitlements.models import CourseEntitlement
-from entitlements.serializers import CourseEntitlementSerializer
+from entitlements.api.v1.serializers import CourseEntitlementSerializer
 from student.tests.factories import CourseEnrollmentFactory, UserFactory, TEST_PASSWORD
 
 
 @unittest.skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')
 class EntitlementViewSetTest(ModuleStoreTestCase):
-    USERNAME = 'Bob'
-    ENABLED_CACHES = ['default']
-    COURSE_RUN_ID = 'some/great/course'
+    ENTITLEMENTS_DETAILS_PATH = 'entitlements_api:v1:entitlements-detail'
 
     def setUp(self):
         super(EntitlementViewSetTest, self).setUp()
@@ -25,7 +23,6 @@ class EntitlementViewSetTest(ModuleStoreTestCase):
         self.client.login(username=self.user.username, password=TEST_PASSWORD)
         self.course = CourseFactory()
         self.entitlements_list_url = reverse('entitlements_api:v1:entitlements-list')
-        self.entitlements_detail_path = 'entitlements_api:v1:entitlements-detail'
 
     def _get_data_set(self, user, course_uuid):
         """
@@ -92,11 +89,11 @@ class EntitlementViewSetTest(ModuleStoreTestCase):
         assert results == CourseEntitlementSerializer(entitlements, many=True).data
 
     def test_get_entitlement_by_uuid(self):
-        entitlements = CourseEntitlementFactory.create_batch(2)
+        entitlement = CourseEntitlementFactory()
+        CourseEntitlementFactory.create_batch(2)
 
-        uuid1 = entitlements[0].uuid
         CourseEntitlementFactory()
-        url = reverse(self.entitlements_detail_path, args=[str(uuid1)])
+        url = reverse(self.ENTITLEMENTS_DETAILS_PATH, args=[str(entitlement.uuid)])
 
         response = self.client.get(
             url,
@@ -105,11 +102,11 @@ class EntitlementViewSetTest(ModuleStoreTestCase):
         assert response.status_code == 200
 
         results = response.data
-        assert results == CourseEntitlementSerializer(entitlements[0]).data
+        assert results == CourseEntitlementSerializer(entitlement).data
 
     def test_delete_and_revoke_entitlement(self):
         course_entitlement = CourseEntitlementFactory()
-        url = reverse(self.entitlements_detail_path, args=[str(course_entitlement.uuid)])
+        url = reverse(self.ENTITLEMENTS_DETAILS_PATH, args=[str(course_entitlement.uuid)])
 
         response = self.client.delete(
             url,
@@ -121,7 +118,7 @@ class EntitlementViewSetTest(ModuleStoreTestCase):
 
     def test_revoke_unenroll_entitlement(self):
         course_entitlement = CourseEntitlementFactory()
-        url = reverse(self.entitlements_detail_path, args=[str(course_entitlement.uuid)])
+        url = reverse(self.ENTITLEMENTS_DETAILS_PATH, args=[str(course_entitlement.uuid)])
 
         enrollment = CourseEnrollmentFactory.create(user=self.user, course_id=self.course.id)
 

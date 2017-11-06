@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .models import CourseEntitlement
+from entitlements.models import CourseEntitlement
 
 
 class CourseEntitlementSerializer(serializers.ModelSerializer):
