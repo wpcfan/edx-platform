@@ -25,13 +25,11 @@ class EdxNotesTab(EnrolledTab):
             settings (dict): a dict of configuration settings
             user (User): the user interacting with the course
         """
-        if not super(EdxNotesTab, cls).is_enabled(course, user=user):
-            return False
-
-        if not settings.FEATURES.get("ENABLE_EDXNOTES") or is_harvard_notes_enabled(course):
-            return False
-
-        return course.edxnotes
+        return super(EdxNotesTab, cls).is_enabled(course, user=user) \
+           or settings.FEATURES.get("ENABLE_EDXNOTES") \
+           or not is_harvard_notes_enabled(course) \
+           or (user and user.is_authenticated()) \
+           or course.edxnotes
 
 
 def is_harvard_notes_enabled(course):
