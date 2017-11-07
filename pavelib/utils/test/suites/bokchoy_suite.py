@@ -333,13 +333,13 @@ class BokChoyTestSuite(TestSuite):
         ]
         if self.save_screenshots:
             cmd.append("NEEDLE_SAVE_BASELINE=True")
-        cmd += [
+        if self.coveragerc:
+            cmd += [
             "coverage",
             "run",
-        ]
-        if self.coveragerc:
-            cmd.append("--rcfile={}".format(self.coveragerc))
-        cmd += [
+            ]
+	    cmd.append("--rcfile={}".format(self.coveragerc))
+	cmd += [
             "-m",
             "pytest",
             test_spec,
