@@ -251,8 +251,9 @@ class SapSuccessFactorsIdentityProvider(EdXSAMLIdentityProvider):
         headers = err.response.headers if err.response else "Not available"
         log_msg_template = (
             'SAPSuccessFactors exception received for {operation_name} request.  ' +
-            'Company ID {company_id}.  ' +
-            'User ID {user_id}.  ' +
+            'URL: {url}  ' +
+            'Company ID: {company_id}.  ' +
+            'User ID: {user_id}.  ' +
             'Error message: {err_msg}.  ' +
             'System message: {sys_msg}.  ' +
             'Headers: {headers}.  ' +
@@ -260,16 +261,15 @@ class SapSuccessFactorsIdentityProvider(EdXSAMLIdentityProvider):
         )
         log_msg = log_msg_template.format(
             operation_name=transaction_data.get('operation_name'),
+            url=transaction_data.get('endpoint_url'),
             company_id=transaction_data.get('company_id'),
             user_id=transaction_data.get('user_id'),
-            url=transaction_data.get('url'),
             err_msg=err.message,
             sys_msg=sys_msg,
             headers=headers,
             token_data=transaction_data.get('token_data'),
         )
         log.warning(log_msg, exc_info=True)
-
 
     def generate_bizx_oauth_api_saml_assertion(self, user_id):
         """
