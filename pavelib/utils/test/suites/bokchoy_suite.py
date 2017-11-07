@@ -335,8 +335,8 @@ class BokChoyTestSuite(TestSuite):
             cmd.append("NEEDLE_SAVE_BASELINE=True")
         if self.coveragerc:
             cmd += [
-            "coverage",
-            "run",
+                "coverage",
+                "run",
             ]
 	    cmd.append("--rcfile={}".format(self.coveragerc))
 	cmd += [
