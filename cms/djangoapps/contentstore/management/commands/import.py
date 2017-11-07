@@ -1,8 +1,6 @@
 """
 Script for importing courseware from XML format
 """
-from optparse import make_option
-
 from django.core.management.base import BaseCommand
 
 from django_comment_common.utils import are_permissions_roles_seeded, seed_permissions_roles
@@ -16,25 +14,24 @@ class Command(BaseCommand):
     """
     Import the specified data directory into the default ModuleStore
     """
-    help = 'Import the specified data directory into the default ModuleStore'
+    help = 'Import the specified data directory into the default ModuleStore.'
 
-    option_list = BaseCommand.option_list + (
-        make_option('--nostatic',
-                    action='store_true',
-                    help='Skip import of static content'),
-    )
+    def add_arguments(self, parser):
+        parser.add_argument('data_directory')
+        parser.add_argument('--nostatic',
+                            action='store_true',
+                            help='skip import of static content')
+        parser.add_argument('course_dirs',
+                            nargs='*',
+                            metavar='course_dir')
 
     def handle(self, *args, **options):
-        "Execute the command"
-        if len(args) == 0:
-            raise CommandError("import requires at least one argument: <data directory> [--nostatic] [<course dir>...]")
-
-        data_dir = args[0]
-        do_import_static = not options.get('nostatic', False)
-        if len(args) > 1:
-            source_dirs = args[1:]
-        else:
+        data_dir = options['data_directory']
+        do_import_static = not options['nostatic']
+        source_dirs = options['course_dirs']
+        if len(source_dirs) == 0:
             source_dirs = None
+
         self.stdout.write("Importing.  Data_dir={data}, source_dirs={courses}\n".format(
             data=data_dir,
             courses=source_dirs,

@@ -182,25 +182,6 @@ class CommandsTestBase(SharedModuleStoreTestCase):
         dumped_id = dump[unicode(discussion_key)]['metadata']['discussion_id']
         self.assertEqual(dumped_id, "custom")
 
-    def test_export_course(self):
-        tmp_dir = path(mkdtemp())
-        self.addCleanup(shutil.rmtree, tmp_dir)
-        filename = tmp_dir / 'test.tar.gz'
-
-        self.run_export_course(filename)
-        with tarfile.open(filename) as tar_file:
-            self.check_export_file(tar_file)
-
-    def test_export_course_stdout(self):
-        output = self.run_export_course('-')
-        with tarfile.open(fileobj=StringIO(output)) as tar_file:
-            self.check_export_file(tar_file)
-
-    def run_export_course(self, filename):  # pylint: disable=missing-docstring
-        args = [unicode(self.test_course_key), filename]
-        kwargs = {'modulestore': 'default'}
-        return self.call_command('export_course', *args, **kwargs)
-
     def check_export_file(self, tar_file):  # pylint: disable=missing-docstring
         names = tar_file.getnames()
 

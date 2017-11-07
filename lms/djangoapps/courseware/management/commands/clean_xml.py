@@ -124,33 +124,30 @@ def check_roundtrip(course_dir):
 
 
 def clean_xml(course_dir, export_dir, force):
-    (ok, course) = import_with_checks(course_dir)
-    if ok or force:
-        if not ok:
-            print "WARNING: Exporting despite errors"
-        export(course, export_dir)
-        check_roundtrip(export_dir)
-    else:
-        print "Did NOT export"
 
 
 class Command(BaseCommand):
-    help = """Imports specified course.xml, validate it, then exports in
-    a canonical format.
+    help = 'Imports specified course, validates it, then exports it in a canonical format.'
 
-Usage: clean_xml PATH-TO-COURSE-DIR PATH-TO-OUTPUT-DIR [force]
-
-If 'force' is specified as the last argument, exports even if there
-were import errors.
-"""
+    def add_arguments(self, parser):
+        parser.add_argument('course_dir',
+                            help='path to the input course directory')
+        parser.add_argument('output_dir',
+                            help='path to the output course directory')
+        parser.add_argument('--force',
+                            action='store_true',
+                            help='export course even if there were import errors')
 
     def handle(self, *args, **options):
-        n = len(args)
-        if n < 2 or n > 3:
-            print Command.help
-            return
+        course_dir = options['course_dir']
+        output_dir = options['output_dir']
+        force = options['force']
 
-        force = False
-        if n == 3 and args[2] == 'force':
-            force = True
-        clean_xml(args[0], args[1], force)
+        (ok, course) = import_with_checks(course_dir)
+        if ok or force:
+            if not ok:
+                print "WARNING: Exporting despite errors"
+            export(course, export_dir)
+            check_roundtrip(export_dir)
+        else:
+            print "Did NOT export"

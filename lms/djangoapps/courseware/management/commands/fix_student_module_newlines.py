@@ -9,10 +9,9 @@ merge that data with data that might have been written to the correct course_id.
 import json
 import logging
 from collections import namedtuple
-from optparse import make_option
 from textwrap import dedent
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from django.db import DatabaseError, transaction
 
 from courseware.models import StudentModule
@@ -25,21 +24,19 @@ FixResult = namedtuple('FixResult', 'record_trimmed data_copied record_archived 
 
 class Command(BaseCommand):
     """Fix StudentModule entries that have Course IDs with trailing newlines."""
-    args = "<start_date> <end_date>"
     help = dedent(__doc__).strip()
-    option_list = BaseCommand.option_list + (
-        make_option('--dry_run',
-                    action='store_true',
-                    default=False,
-                    help="Run read queries and say what we're going to do, but don't actually do it."),
-    )
+
+    def add_arguments(self, parser):
+        parser.add_argument('start_date')
+        parser.add_argument('end_date')
+        parser.add_argument('--dry_run',
+                            action='store_true',
+                            help="run read queries and say what we're going to do, but don't actually do it")
 
     def handle(self, *args, **options):
         """Fix newline courses in CSM!"""
-        if len(args) != 2:
-            raise CommandError('Must specify start and end dates: e.g. "2016-08-23 16:43:00" "2016-08-24 22:00:00"')
-
-        start, end = args
+        start = options['start_date']
+        end = options['end_date']
         dry_run = options['dry_run']
 
         log.info(
