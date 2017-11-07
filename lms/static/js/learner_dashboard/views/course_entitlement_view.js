@@ -28,12 +28,12 @@
                  },
 
                  render: function(options) {
-                    var data = $.extend(this.entitlementModel.toJSON(), {
-                        course_session_id: options.$data['course_session_id'],
-                        available_sessions: options.$data['available_sessions'],
-                    });
-                    HtmlUtils.setHtml(this.$el, this.tpl(data));
-                 },
+                     var data = $.extend(this.entitlementModel.toJSON(), {
+                         availableSessions: options.availableSessions,
+                         entitlementUUID: options.entitlementUUID
+                     });
+                     HtmlUtils.setHtml(this.$el, this.tpl(data));
+                 }
              });
          }
     );

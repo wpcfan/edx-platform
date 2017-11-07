@@ -1,9 +1,10 @@
 <div class="message is-shown">
-    <h5> You must select a course run.</h5>
+    <h5> You must select a course run for uuid <%-entitlementUUID %>.</h5>
     <select>
-        <% for (var i=0; i< available_sessions.length; i++) { %>
-            <option><%-available_sessions[i] %></option>
+        <option selected="selected">Select session later</option>
+        <% for (var i=0; i< availableSessions.length; i++) { %>
+            <option><%-availableSessions[i] %></option>
         <% } %>
     </select>
-    <button class="btn btn-primary"> Select Run </button>
+    <button class="btn btn-primary"> Enroll In Session </button>
 </div>

@@ -11,7 +11,7 @@
             return Backbone.Model.extend({
                 defaults: {
                     course_session_id: null,
-                    available_sessions: [],
+                    available_sessions: []
                 }
             });
         }
