@@ -1,3 +1,6 @@
+import unittest
+
+from django.conf import settings
 from django.test import RequestFactory
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 
@@ -6,6 +9,8 @@ from entitlements.tests.factories import CourseEntitlementFactory
 
 
 class EntitlementsSerializerTests(ModuleStoreTestCase):
+    def setUp(self):
+        super(EntitlementsSerializerTests, self).setUp()
 
     def test_data(self):
         entitlement = CourseEntitlementFactory()

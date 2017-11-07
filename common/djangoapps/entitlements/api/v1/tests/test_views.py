@@ -13,7 +13,6 @@ from entitlements.api.v1.serializers import CourseEntitlementSerializer
 from student.tests.factories import CourseEnrollmentFactory, UserFactory, TEST_PASSWORD
 
 
-@unittest.skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')
 class EntitlementViewSetTest(ModuleStoreTestCase):
     ENTITLEMENTS_DETAILS_PATH = 'entitlements_api:v1:entitlements-detail'
 
