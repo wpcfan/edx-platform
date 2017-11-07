@@ -338,8 +338,8 @@ class BokChoyTestSuite(TestSuite):
                 "coverage",
                 "run",
             ]
-        cmd.append("--rcfile={}".format(self.coveragerc))
-    cmd += [
+            cmd.append("--rcfile={}".format(self.coveragerc))
+        cmd += [
             "-m",
             "pytest",
             test_spec,
