@@ -3,6 +3,7 @@ Defines asynchronous celery task for sending email notification (through edx-ace
 pertaining to new discussion forum comments.
 """
 import logging
+from urllib import urlencode
 from urlparse import urljoin
 
 from celery import task
@@ -15,6 +16,7 @@ from edx_ace import ace
 from edx_ace.message import MessageType
 from edx_ace.recipient import Recipient
 from opaque_keys.edx.keys import CourseKey
+from openedx.core.djangoapps.site_configuration.helpers import get_value
 from lms.djangoapps.django_comment_client.utils import permalink
 import lms.lib.comment_client as cc
 from lms.lib.comment_client.utils import merge_dict
@@ -79,6 +81,7 @@ def _build_message_context(context):
     message_context = get_base_template_context(Site.objects.get_current())
     message_context.update(context)
     message_context['post_link'] = _get_thread_url(context)
+    message_context['ga_tracking_pixel_url'] = _generate_ga_pixel_url(context['course_id'], context['thread_author_id'])
     return message_context
 
 
@@ -90,3 +93,26 @@ def _get_thread_url(context):
         'id': context['thread_id'],
     }
     return urljoin(settings.LMS_ROOT_URL, permalink(thread_content))
+
+
+def _generate_ga_pixel_url(course_key, user_id):
+    # used for analytics
+    query_params = {
+        'v': '1',
+        't': 'event',
+        'ec': 'email',
+        'ea': 'open',
+        'tid': get_value("GOOGLE_ANALYTICS_TRACKING_ID", settings.GOOGLE_ANALYTICS_TRACKING_ID),
+        'uid': user_id,
+        'utm_source': 'discussion_notification_email',
+        'utm_medium': 'email',
+        'cm': 'email',
+        'cn': 'discussions_notifications_emails',
+        'dp': '/email/ace/discussions/responsenotification/{0}/'.format(course_key),
+        'dt': 'To Be Filled In',
+    }
+
+    returng u"{url}?{params}".format(
+        url="https://www.google-analytics.com/collect",
+        params=urlencode(query_params)
+    )
