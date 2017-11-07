@@ -64,7 +64,7 @@ def create_schedule(sender, **kwargs):
     else:
         experience_type = ScheduleExperience.EXPERIENCES.default
 
-    if _suppress_schedules_for_some_enrollments(schedule_config):
+    if random.random() < schedule_config.hold_back_ratio:
         log.debug('Schedules: Enrollment held back from dynamic schedule experiences.')
         upgrade_deadline_str = None
         if upgrade_deadline:
@@ -112,16 +112,6 @@ def update_schedules_on_course_start_changed(sender, updated_course_overview, pr
                 new_upgrade_deadline_str=date.serialize(upgrade_deadline),
             ),
         )
-
-
-def _suppress_schedules_for_some_enrollments(schedule_config):
-    if schedule_config.hold_back_ratio <= 0 or schedule_config.hold_back_ratio > 1:
-        return False
-
-    if random.random() > schedule_config.hold_back_ratio:
-        return False
-
-    return True
 
 
 def _calculate_upgrade_deadline(course_id, content_availability_date):
