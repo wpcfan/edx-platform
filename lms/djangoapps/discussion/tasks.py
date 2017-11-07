@@ -112,7 +112,7 @@ def _generate_ga_pixel_url(course_key, user_id):
         'dt': 'To Be Filled In',
     }
 
-    returng u"{url}?{params}".format(
+    return u"{url}?{params}".format(
         url="https://www.google-analytics.com/collect",
         params=urlencode(query_params)
     )
