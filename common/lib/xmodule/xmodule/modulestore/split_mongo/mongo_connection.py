@@ -382,6 +382,26 @@ class MongoConnection(object):
             return docs
 
     @autoretry_read()
+    def find_library_blocks_by_id(self, ids, course_context=None):
+        """
+        Find all structures that specified in `ids`. Among the blocks only return block whose type is `library`.
+
+        Arguments:
+            ids (list): A list of structure ids
+        """
+        with TIMER.timer("find_library_blocks_by_id", course_context) as tagger:
+            tagger.measure("requested_ids", len(ids))
+            docs = [
+                structure_from_mongo(structure, course_context)
+                for structure in self.structures.find(
+                    {'_id': {'$in': ids}},
+                    {'blocks': {'$elemMatch': {'block_type': 'library'}}, 'root': 1}
+                )
+                ]
+            tagger.measure("structures", len(docs))
+            return docs
+
+    @autoretry_read()
     def find_structures_derived_from(self, ids, course_context=None):
         """
         Return all structures that were immediately derived from a structure listed in ``ids``.

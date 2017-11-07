@@ -640,3 +640,48 @@ class LibraryContentDescriptor(LibraryContentFields, MakoModuleDescriptor, XmlDe
             if field.is_set_on(self):
                 xml_object.set(field_name, unicode(field.read_from(self)))
         return xml_object
+
+class LibrarySummary(object):
+    """
+    A lightweight library summary class, which constructs split/mongo course summary without loading
+    the course. It is used at cms for listing courses to global staff user.
+    """
+
+    def __init__(self, library_locator, display_name=u"Empty"):
+        """
+        Initialize and construct course summary
+
+        Arguments:
+        course_locator (CourseLocator):  CourseLocator object of the course.
+
+        display_name (unicode): display name of the course. When you create a course from console, display_name
+        isn't set (course block has no key `display_name`). "Empty" name is returned when we load the course.
+        If `display_name` isn't present in the course block, use the `Empty` as default display name.
+        We can set None as a display_name in Course Advance Settings; Do not use "Empty" when display_name is
+        set to None.
+
+        display_coursenumber (unicode|None): Course number that is specified & appears in the courseware
+
+        display_organization (unicode|None): Course organization that is specified & appears in the courseware
+
+        """
+        self.display_name = display_name
+
+        self.id = library_locator  # pylint: disable=invalid-name
+        self.location = library_locator.make_usage_key('library', 'library')
+
+    @property
+    def display_org_with_default(self):
+        """
+        Org display names are not implemented. This just provides API compatibility with CourseDescriptor.
+        Always returns the raw 'org' field from the key.
+        """
+        return self.location.org
+
+    @property
+    def display_number_with_default(self):
+        """
+        Display numbers are not implemented. This just provides API compatibility with CourseDescriptor.
+        Always returns the raw 'library' field from the key.
+        """
+        return self.location.library

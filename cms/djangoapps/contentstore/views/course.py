@@ -484,7 +484,7 @@ def _accessible_libraries_iter(user, org=None):
     if org is not None:
         libraries = [] if org == '' else modulestore().get_libraries(org=org)
     else:
-        libraries = modulestore().get_libraries()
+        libraries = modulestore().get_library_summaries()
     # No need to worry about ErrorDescriptors - split's get_libraries() never returns them.
     return (lib for lib in libraries if has_studio_read_access(user, lib.location.library_key))
 
@@ -529,6 +529,14 @@ def course_listing(request):
         """
         Return a dict of the data which the view requires for each library
         """
+        # 'display_name': course.display_name,
+        # 'course_key': unicode(course.location.course_key),
+        # 'url': reverse_course_url('course_handler', course.id),
+        # 'lms_link': get_lms_link_for_item(course.location),
+        # 'rerun_link': _get_rerun_link_for_item(course.id),
+        # 'org': course.display_org_with_default,
+        # 'number': course.display_number_with_default,
+        # 'run': course.location.run
         return {
             u'display_name': library.display_name,
             u'library_key': unicode(library.location.library_key),

@@ -593,6 +593,17 @@ class SplitBulkWriteMixin(BulkOperationsMixin):
         ids = set(ids)
         return self.db_connection.find_course_blocks_by_id(list(ids))
 
+    def find_library_blocks_by_id(self, ids):
+        """
+        Find all structures that specified in `ids`. Filter the course blocks to only return whose
+        `block_type` is `library`
+
+        Arguments:
+            ids (list): A list of structure ids
+        """
+        ids = set(ids)
+        return self.db_connection.find_library_blocks_by_id(list(ids))
+
     def find_structures_by_id(self, ids):
         """
         Return all structures that specified in ``ids``.
@@ -926,6 +937,19 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
             for course_index in id_version_map[entry['_id']]:
                 yield entry, course_index
 
+    def _get_library_blocks_for_branch(self, branch, **kwargs):
+        """
+        Internal generator for fetching lists of courses without loading them.
+        """
+        version_guids, id_version_map = self.collect_ids_from_matching_indexes(branch, **kwargs)
+
+        if not version_guids:
+            return
+
+        for entry in self.find_library_blocks_by_id(version_guids):
+            for course_index in id_version_map[entry['_id']]:
+                yield entry, course_index
+
     def _get_structures_for_branch(self, branch, **kwargs):
         """
         Internal generator for fetching lists of courses, libraries, etc.
@@ -1058,6 +1082,54 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
                 CourseSummary(course_locator, **course_summary)
             )
         return courses_summaries
+
+    @autoretry_read()
+    def get_library_summaries(self, branch='library', **kwargs):
+        """
+        Returns a list of `LibrarySummary` which matching any given qualifiers.
+
+        qualifiers should be a dict of keywords matching the db fields or any
+        legal query for mongo to use against the active_versions collection.
+
+        Note, this is to find the current head of the named branch type.
+        To get specific versions via guid use get_course.
+
+        :param branch: the branch for which to return courses.
+        """
+
+        def extract_display_name(library):
+            """
+            Extract course information from the course block for split.
+            """
+            return library.fields['display_name'] if library.fields['display_name'] else ''
+            # return {
+            #     field: library.fields[field]
+            #     for field in LibrarySummary.library_info_fields
+            #     if field in library.fields
+            #     }
+
+        libraries_summaries = []
+        for entry, structure_info in self._get_library_blocks_for_branch(branch, **kwargs):
+            library_locator = self._create_library_locator(structure_info, branch=None)
+            library_block = [
+                block_data
+                for block_key, block_data in entry['blocks'].items()
+                if block_key.type == "library"
+                ]
+            if not library_block:
+                raise ItemNotFoundError
+
+            if len(library_block) > 1:
+                raise MultipleCourseBlocksFound(
+                    "Expected 1 library block to be found in the library, but found {0}".format(len(course_block))
+                )
+            display_name = extract_display_name(library_block[0])
+            libraries_summaries.append(
+                LibrarySummary(library_locator, display_name)
+            )
+        return libraries_summaries
+
+
 
     def get_libraries(self, branch="library", **kwargs):
         """
