@@ -16,11 +16,15 @@ from django_comment_common.models import ForumsConfig
 from django_comment_common.signals import comment_created
 from edx_ace.recipient import Recipient
 from lms.djangoapps.discussion.config.waffle import waffle, FORUM_RESPONSE_NOTIFICATIONS
+from lms.djangoapps.discussion.tasks import _should_send_message
 from openedx.core.djangoapps.content.course_overviews.tests.factories import CourseOverviewFactory
 from openedx.core.djangoapps.schedules.template_context import get_base_template_context
 from student.tests.factories import CourseEnrollmentFactory, UserFactory
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 
+NOW = datetime.utcnow()
+ONE_HOUR_AGO = NOW - timedelta(hours=1)
+TWO_HOURS_AGO = NOW - timedelta(hours=2)
 
 @contextmanager
 def mock_the_things():
@@ -63,7 +67,6 @@ class TaskTestCase(ModuleStoreTestCase):
         # Patch the comment client user save method so it does not try
         # to create a new cc user when creating a django user
         with mock.patch('student.models.cc.User.save'):
-
             self.thread_author = UserFactory(
                 username='thread_author',
                 password='password',
@@ -88,6 +91,50 @@ class TaskTestCase(ModuleStoreTestCase):
         config.enabled = True
         config.save()
 
+        self.thread, self.comment, self.comment2, self.subcomment = self.create_thread_and_comments()
+
+    def create_thread_and_comments(self):
+        # Thread
+        # - Comment
+        # - - Subcomment
+        # - Comment2
+        thread = mock.Mock(
+            id=self.discussion_id,
+            course_id=self.course.id,
+            created_at=TWO_HOURS_AGO,
+            title='thread-title',
+            user_id=self.thread_author.id,
+            username=self.thread_author.username,
+            commentable_id='thread-commentable-id'
+        )
+        comment = mock.Mock(
+            id='comment-id',
+            body='comment-body',
+            created_at=ONE_HOUR_AGO,
+            thread=thread,
+            user_id=self.comment_author.id,
+            username=self.comment_author.username
+        )
+        comment2 = mock.Mock(
+            id='comment2-id',
+            body='comment2-body',
+            created_at=NOW,
+            thread=thread,
+            user_id=self.comment_author.id,
+            username=self.comment_author.username
+        )
+        subcomment = mock.Mock(
+            id='subcomment-id',
+            body='subcomment-body',
+            created_at=NOW,
+            thread=thread,
+            parent_id=comment.id,
+            user_id=self.comment_author.id,
+            username=self.comment_author.username
+        )
+        comment.children = [subcomment]
+        return thread, comment, comment2, subcomment
+
     @ddt.data(True, False)
     def test_send_discussion_email_notification(self, user_subscribed):
         with mock_the_things() as mocked_items:
@@ -100,42 +147,22 @@ class TaskTestCase(ModuleStoreTestCase):
                 mock_request.side_effect = make_mock_responder([non_matching_id, self.discussion_id])
             else:
                 mock_request.side_effect = make_mock_responder([])
-
-            now = datetime.utcnow()
-            one_hour_ago = now - timedelta(hours=1)
-            thread = mock.Mock(
-                id=self.discussion_id,
-                course_id=self.course.id,
-                created_at=one_hour_ago,
-                title='thread-title',
-                user_id=self.thread_author.id,
-                username=self.thread_author.username,
-                commentable_id='thread-commentable-id'
-            )
-            comment = mock.Mock(
-                id='comment-id',
-                body='comment-body',
-                created_at=now,
-                thread=thread,
-                user_id=self.comment_author.id,
-                username=self.comment_author.username
-            )
             user = mock.Mock()
 
             with waffle().override(FORUM_RESPONSE_NOTIFICATIONS):
-                comment_created.send(sender=None, user=user, post=comment)
+                comment_created.send(sender=None, user=user, post=self.comment)
 
             if user_subscribed:
                 expected_message_context = get_base_template_context(Site.objects.get_current())
                 expected_message_context.update({
                     'comment_author_id': self.comment_author.id,
                     'comment_body': 'comment-body',
-                    'comment_created_at': now,
+                    'comment_created_at': ONE_HOUR_AGO,
                     'comment_id': 'comment-id',
                     'comment_username': self.comment_author.username,
                     'course_id': self.course.id,
                     'thread_author_id': self.thread_author.id,
-                    'thread_created_at': one_hour_ago,
+                    'thread_created_at': TWO_HOURS_AGO,
                     'thread_id': self.discussion_id,
                     'thread_title': 'thread-title',
                     'thread_username': self.thread_author.username,
@@ -149,3 +176,41 @@ class TaskTestCase(ModuleStoreTestCase):
                 self.assertEqual(self.course.language, actual_message.language)
             else:
                 self.assertFalse(mock_ace_send.called)
+
+    def test_subcomment_should_not_send_email(self):
+        with mock_the_things() as mocked_items:
+            mock_request, mock_ace_send, mock_permalink = mocked_items
+            mock_request.side_effect = make_mock_responder([self.discussion_id])
+
+            user = mock.Mock()
+
+            with waffle().override(FORUM_RESPONSE_NOTIFICATIONS):
+                comment_created.send(sender=None, user=user, post=self.subcomment)
+
+            actual_result = _should_send_message({
+                'thread_author_id': self.thread_author.id,
+                'course_id': self.course.id,
+                'comment_id': self.subcomment.id,
+                'thread_id': self.thread.id
+            })
+            self.assertEqual(actual_result, False)
+            self.assertFalse(mock_ace_send.called)
+
+    def test_only_first_comment_should_send_email(self):
+        with mock_the_things() as mocked_items:
+            mock_request, mock_ace_send, mock_permalink = mocked_items
+            mock_request.side_effect = make_mock_responder([self.discussion_id])
+
+            user = mock.Mock()
+
+            with waffle().override(FORUM_RESPONSE_NOTIFICATIONS):
+                comment_created.send(sender=None, user=user, post=self.comment2)
+
+            actual_result = _should_send_message({
+                'thread_author_id': self.thread_author.id,
+                'course_id': self.course.id,
+                'comment_id': self.comment2.id,
+                'thread_id': self.thread.id
+            })
+            self.assertEqual(actual_result, False)
+            self.assertFalse(mock_ace_send.called)

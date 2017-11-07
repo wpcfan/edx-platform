@@ -54,7 +54,22 @@ def send_ace_message(context):
 
 def _should_send_message(context):
     cc_thread_author = cc.User(id=context['thread_author_id'], course_id=context['course_id'])
-    return _is_user_subscribed_to_thread(cc_thread_author, context['thread_id'])
+    comment = cc.Comment.find(id=context['comment_id'])
+    return all(
+        _is_user_subscribed_to_thread(cc_thread_author, context['thread_id']),
+        _is_not_subcomment(comment),
+        _is_first_comment(comment, context['thread_id'])
+    )
+
+
+def _is_not_subcomment(comment):
+    return not comment.parent_id
+
+
+def _is_first_comment(comment, thread_id):
+    thread = cc.Thread.find(thread_id)
+    first_comment = cc.Comment.find(thread.children.first)
+    return first_comment == comment
 
 
 def _is_user_subscribed_to_thread(cc_user, thread_id):
