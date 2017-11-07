@@ -8,6 +8,7 @@ from entitlements.api.v1.serializers import CourseEntitlementSerializer
 from entitlements.tests.factories import CourseEntitlementFactory
 
 
+@unittest.skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')
 class EntitlementsSerializerTests(ModuleStoreTestCase):
     def setUp(self):
         super(EntitlementsSerializerTests, self).setUp()
