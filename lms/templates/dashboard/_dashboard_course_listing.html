@@ -279,17 +279,18 @@ from util.course import get_link_for_about_page, get_encoded_course_sharing_utm_
   <footer class="wrapper-messages-primary">
     <div class="messages-list">
 
-        % if entitlement:
-          <div class="course-entitlement-selection-container"></div>
-          <%static:require_module module_name="js/learner_dashboard/course_entitlement_factory" class_name="EntitlementFactory">
-            EntitlementFactory({
-                $el: '.course-entitlement-selection-container',
-                $dateDisplayField: '.info-date-block',
-                availableSessions: ['March to May','June to July', 'August to September'],
-                entitlementUUID: '${ entitlement.uuid | n, js_escaped_string }'
-            });
-          </%static:require_module>
-        %endif
+      % if entitlement:
+        <div class="course-entitlement-selection-container"></div>
+        <%static:require_module module_name="js/learner_dashboard/course_entitlement_factory" class_name="EntitlementFactory">
+          EntitlementFactory({
+              $el: '.course-entitlement-selection-container',
+              $triggerOpenBtn: '.change-session',
+              $dateDisplayField: '.info-date-block',
+              availableSessions: ['March to May','June to July', 'August to September'],
+              entitlementUUID: '${ entitlement.uuid | n, js_escaped_string }'
+          });
+        </%static:require_module>
+      %endif
 
       % if related_programs and not entitlement:
       <div class="message message-related-programs is-shown">

@@ -1071,6 +1071,50 @@
       @include padding($baseline/2, $baseline, $baseline/2, $baseline/2);
     }
   }
+
+  // Course Entitlement Selection Container
+  .course-entitlement-selection-container {
+    background-color: theme-color("inverse");
+
+    .action-header {
+      padding-bottom: $baseline/4;
+      font-weight: $font-weight-bold;
+      color: theme-color("dark");
+    }
+
+    .action-controls {
+      display: flex;
+
+      .session-select {
+        background-color: theme-color("inverse");
+        height: $baseline*1.5;
+        flex-grow: 5;
+      }
+
+      .enroll-btn {
+        @include margin-left($baseline);
+
+        height: $baseline*1.5;
+        flex-grow: 1;
+        letter-spacing: 0;
+        background: theme-color("inverse");
+        border-color: theme-color("primary");
+        color: theme-color("primary");
+        text-shadow: none;
+        font-size: $font-size-base;
+        padding: 0;
+        box-shadow: none;
+        border-radius: $border-radius-sm;
+        transition: all 0.4s ease-out;
+
+        &:hover {
+          background: theme-color("primary");
+          border-color: theme-color("primary");
+          color: theme-color("inverse");
+        }
+      }
+    }
+  }
 }
 
 // CASE: empty dashboard
