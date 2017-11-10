@@ -14,7 +14,7 @@ from .utils.envs import Env
 from .utils.timer import timed
 
 PREREQS_STATE_DIR = os.getenv('PREREQ_CACHE_DIR', Env.REPO_ROOT / '.prereqs_cache')
-NPM_REGISTRY = "https://registry.npmjs.org/"
+NPM_REGISTRY = "https://registry.npm.taobao.org"
 NO_PREREQ_MESSAGE = "NO_PREREQ_INSTALL is set, not installing prereqs"
 NO_PYTHON_UNINSTALL_MESSAGE = 'NO_PYTHON_UNINSTALL is set. No attempts will be made to uninstall old Python libs.'
 COVERAGE_REQ_FILE = 'requirements/edx/coverage.txt'
