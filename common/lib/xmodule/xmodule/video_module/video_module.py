@@ -24,7 +24,7 @@ from pkg_resources import resource_string
 from django.conf import settings
 from lxml import etree
 from opaque_keys.edx.locator import AssetLocator
-from openedx.core.djangoapps.video_config.models import HLSPlaybackEnabledFlag, VideoTranscriptEnabledFlag
+from openedx.core.djangoapps.video_config.models import HLSPlaybackEnabledFlag
 from openedx.core.lib.cache_utils import memoize_in_request_cache
 from openedx.core.lib.license import LicenseMixin
 from xblock.core import XBlock
@@ -216,7 +216,8 @@ class VideoModule(VideoFields, VideoTranscriptsMixin, VideoStudentViewHandlers, 
         # Determine if there is an alternative source for this video
         # based on user locale.  This exists to support cases where
         # we leverage a geography specific CDN, like China.
-        cdn_url = getattr(settings, 'VIDEO_CDN_URL', {}).get(self.system.user_location)
+        default_cdn_url = getattr(settings, 'VIDEO_CDN_URL', {}).get('default')
+        cdn_url = getattr(settings, 'VIDEO_CDN_URL', {}).get(self.system.user_location, default_cdn_url)
 
         # If we have an edx_video_id, we prefer its values over what we store
         # internally for download links (source, html5_sources) and the youtube

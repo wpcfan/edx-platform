@@ -109,6 +109,8 @@ from lms.envs.common import (
     PASSWORD_RESET_SUPPORT_LINK,
     ACTIVATION_EMAIL_SUPPORT_LINK,
 
+    DEFAULT_MOBILE_AVAILABLE,
+
     CONTACT_EMAIL,
 
     DISABLE_ACCOUNT_ACTIVATION_REQUIREMENT_SWITCH,
@@ -376,9 +378,10 @@ AUTHENTICATION_BACKENDS = [
 
 LMS_BASE = None
 LMS_ROOT_URL = "http://localhost:8000"
+LMS_INTERNAL_ROOT_URL = LMS_ROOT_URL
 LMS_ENROLLMENT_API_PATH = "/api/enrollment/v1/"
-ENTERPRISE_API_URL = LMS_ROOT_URL + '/enterprise/api/v1/'
-ENTERPRISE_CONSENT_API_URL = LMS_ROOT_URL + '/consent/api/v1/'
+ENTERPRISE_API_URL = LMS_INTERNAL_ROOT_URL + '/enterprise/api/v1/'
+ENTERPRISE_CONSENT_API_URL = LMS_INTERNAL_ROOT_URL + '/consent/api/v1/'
 
 # These are standard regexes for pulling out info like course_ids, usage_ids, etc.
 # They are used so that URLs with deprecated-format strings still work.
@@ -1240,6 +1243,11 @@ ADVANCED_SECURITY_CONFIG = {}
 ### External auth usage -- prefixes for ENROLLMENT_DOMAIN
 SHIBBOLETH_DOMAIN_PREFIX = 'shib:'
 OPENID_DOMAIN_PREFIX = 'openid:'
+
+# Set request limits for maximum size of a request body and maximum number of GET/POST parameters. (>=Django 1.10)
+# Limits are currently disabled - but can be used for finer-grained denial-of-service protection.
+DATA_UPLOAD_MAX_MEMORY_SIZE = None
+DATA_UPLOAD_MAX_NUMBER_FIELDS = None
 
 ### Size of chunks into which asset uploads will be divided
 UPLOAD_CHUNK_SIZE_IN_MB = 10

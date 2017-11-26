@@ -48,7 +48,7 @@ from slumber.exceptions import HttpClientError, HttpServerError
 import dogstats_wrapper as dog_stats_api
 import lms.lib.comment_client as cc
 import request_cache
-from student.signals import UNENROLL_DONE, ENROLL_STATUS_CHANGE, REFUND_ORDER, ENROLLMENT_TRACK_UPDATED
+from student.signals import UNENROLL_DONE, ENROLL_STATUS_CHANGE, ENROLLMENT_TRACK_UPDATED
 from certificates.models import GeneratedCertificate
 from course_modes.models import CourseMode
 from courseware.models import (
@@ -1760,7 +1760,7 @@ class CourseEnrollment(models.Model):
             return None
 
         try:
-            if not self.schedule:
+            if not self.schedule or not self.schedule.active:  # pylint: disable=no-member
                 return None
 
             log.debug(
@@ -1871,7 +1871,7 @@ class CourseEnrollment(models.Model):
         # remove previously cached entries to keep memory usage low.
         request_cache.clear_cache(cls.MODE_CACHE_NAMESPACE)
 
-        records = cls.objects.filter(user__in=users, course_id=course_key).select_related('user__id')
+        records = cls.objects.filter(user__in=users, course_id=course_key).select_related('user')
         cache = cls._get_mode_active_request_cache()
         for record in records:
             enrollment_state = CourseEnrollmentState(record.mode, record.is_active)
