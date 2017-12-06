@@ -8,6 +8,7 @@ from datetime import datetime
 from functools import partial
 
 import ddt
+import pytest
 import pytz
 from bson import ObjectId
 from django.conf import settings
@@ -222,6 +223,7 @@ class ModuleRenderTestCase(SharedModuleStoreTestCase, LoginEnrollmentTestCase):
         # note if the URL mapping changes then this assertion will break
         self.assertIn('/courses/' + self.course_key.to_deprecated_string() + '/jump_to_id/vertical_test', html)
 
+    @pytest.mark.django111_expected_failure
     def test_xqueue_callback_success(self):
         """
         Test for happy-path xqueue_callback

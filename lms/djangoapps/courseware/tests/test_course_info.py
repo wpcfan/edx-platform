@@ -3,11 +3,12 @@
 Test the course_info xblock
 """
 import mock
-from ccx_keys.locator import CCXLocator
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import QueryDict
 from django.test.utils import override_settings
+
+from ccx_keys.locator import CCXLocator
 from lms.djangoapps.ccx.tests.factories import CcxFactory
 from nose.plugins.attrib import attr
 from openedx.core.djangoapps.self_paced.models import SelfPacedConfiguration

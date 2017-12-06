@@ -8,6 +8,7 @@ from urllib import urlencode
 
 import ddt
 import mock
+import pytest
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -470,6 +471,7 @@ class StudentAccountLoginAndRegistrationTest(ThirdPartyAuthTestMixin, UrlResetMi
         ('register_user', 'register'),
     )
     @ddt.unpack
+    @pytest.mark.django111_expected_failure
     def test_hinted_login_dialog_disabled(self, url_name, auth_entry):
         """Test that the dialog doesn't show up for hinted logins when disabled. """
         self.google_provider.skip_hinted_login_dialog = True
@@ -513,6 +515,7 @@ class StudentAccountLoginAndRegistrationTest(ThirdPartyAuthTestMixin, UrlResetMi
         ('register_user', 'register'),
     )
     @ddt.unpack
+    @pytest.mark.django111_expected_failure
     def test_settings_tpa_hinted_login_dialog_disabled(self, url_name, auth_entry):
         """Test that the dialog doesn't show up for hinted logins when disabled via settings.THIRD_PARTY_AUTH_HINT. """
         self.google_provider.skip_hinted_login_dialog = True
